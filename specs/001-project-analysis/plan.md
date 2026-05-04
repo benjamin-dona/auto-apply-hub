@@ -23,7 +23,7 @@ Se prioriza victoria de postulaciones, cumplimiento de reglas por plataforma y t
 **Project Type**: Web-service backend + workers  
 **Performance Goals**: ingesta <10 min desde deteccion; evaluar 1k ofertas/hora; p95 API interna <300ms para consultas operativas  
 **Constraints**: `DEFAULT_SIMULATE=true`; scraping etico (robots.txt, rate limit 1-2 rps por dominio, backoff 429/5xx); no secretos en codigo; Liquibase obligatorio para cambios DB  
-**Scale/Scope**: MVP para Workana + Mercado Publico con expansion a mas sitios via catalogo de reglas y conectores
+**Scale/Scope**: MVP para **Workana** (sitio unico inicial); arquitectura de conectores y catalogo de reglas permite agregar Mercado Publico y otros sitios sin cambios de modelo.
 
 ## Constitution Check
 
@@ -74,7 +74,6 @@ src/
 │   │   └── account-assignment.service.ts
 │   ├── ingestion/
 │   │   ├── connectors/
-│   │   │   ├── mercadopublico.connector.ts
 │   │   │   └── workana.connector.ts
 │   │   └── offer-normalizer.service.ts
 │   ├── analysis/

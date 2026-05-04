@@ -19,7 +19,7 @@ Como operador de AutoApply Hub, quiero que el sistema ingiera y normalice oferta
 
 **Why this priority**: Sin una fuente primaria de ofertas confiable no existe base para analizar ni postular; bloquea todo el objetivo de victoria.
 
-**Independent Test**: Puede probarse de forma independiente al cargar una muestra de ofertas desde dos sitios distintos y verificar que se almacenan sin perder informacion clave del anuncio.
+**Independent Test**: Puede probarse de forma independiente al cargar una muestra de ofertas desde Workana y verificar que se almacenan sin perder informacion clave del anuncio.
 
 **Acceptance Scenarios**:
 
@@ -126,6 +126,7 @@ Como operador, quiero monitorear resultados de postulaciones (ganada, rechazada,
 
 ## Assumptions
 
+- **Scope MVP**: El sitio objetivo para esta version es **Workana**. Mercado Publico y otros sitios son expansion futura; la arquitectura de conectores y catalogo de reglas esta disenada para agregar nuevos sitios sin cambios de modelo.
 - Las plataformas objetivo permiten acceso legitimo a sus ofertas mediante API oficial o consulta responsable de informacion publica.
 - El operador define politicas de costo minimo y umbrales de riesgo para habilitar recomendaciones consistentes.
 - La activacion de postulaciones reales requiere consentimiento explicito del operador en cada entorno.

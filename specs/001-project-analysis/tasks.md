@@ -47,8 +47,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Implementar conector Mercado Público en `src/modules/ingestion/connectors/mercadopublico.connector.ts`
-- [ ] T016 [P] [US1] Implementar conector Workana con scraping ético en `src/modules/ingestion/connectors/workana.connector.ts`
+- [ ] T016 [US1] Implementar conector Workana con scraping ético en `src/modules/ingestion/connectors/workana.connector.ts`
 - [ ] T017 [US1] Implementar normalizador de ofertas multi-sitio en `src/modules/ingestion/offer-normalizer.service.ts`
 - [ ] T018 [US1] Implementar repositorio de ofertas y deduplicación en `src/modules/ingestion/offer-repository.ts`
 - [ ] T019 [US1] Implementar worker de ingesta programada en `src/workers/ingest.worker.ts`
@@ -167,11 +166,10 @@
 ## Parallel Example: User Story 1
 
 ```bash
-# Trabajo paralelo recomendado para US1
-Task T015: src/modules/ingestion/connectors/mercadopublico.connector.ts
+# Trabajo para US1 (sitio unico MVP: Workana)
 Task T016: src/modules/ingestion/connectors/workana.connector.ts
 
-# Luego converger en normalización y repositorio
+# Luego normalización y repositorio
 Task T017: src/modules/ingestion/offer-normalizer.service.ts
 Task T018: src/modules/ingestion/offer-repository.ts
 ```
