@@ -1,0 +1,74 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-create-intentos-resultados
+      author: auto-apply-hub
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE auto_apply.intento_postulacion (
+                id               BIGINT       NOT NULL GENERATED ALWAYS AS IDENTITY,
+                offer_id         TEXT         NOT NULL,
+                strategy_id      UUID         NOT NULL,
+                account_site_id  UUID         NOT NULL,
+                mode             TEXT         NOT NULL DEFAULT 'simulate',
+                status           TEXT         NOT NULL DEFAULT 'queued',
+                sent_payload     JSONB        NOT NULL DEFAULT '{}',
+                response_payload JSONB,
+                sent_at          TIMESTAMPTZ,
+                created_at       TIMESTAMPTZ  NOT NULL DEFAULT now(),
+                CONSTRAINT intento_postulacion_pk PRIMARY KEY (id),
+                CONSTRAINT intento_mode_chk CHECK (mode IN ('simulate', 'real')),
+                CONSTRAINT intento_status_chk CHECK (status IN ('queued', 'sent', 'failed', 'simulated')),
+                CONSTRAINT intento_fk_offer
+                  FOREIGN KEY (offer_id)
+                  REFERENCES auto_apply.oferta_proyecto (id)
+                  ON DELETE RESTRICT
+                  ON UPDATE CASCADE,
+                CONSTRAINT intento_fk_strategy
+                  FOREIGN KEY (strategy_id)
+                  REFERENCES auto_apply.estrategia_postulacion (id)
+                  ON DELETE RESTRICT
+                  ON UPDATE CASCADE,
+                CONSTRAINT intento_fk_cuenta
+                  FOREIGN KEY (account_site_id)
+                  REFERENCES auto_apply.cuenta_sitio (id)
+                  ON DELETE RESTRICT
+                  ON UPDATE CASCADE
+              );
+
+              CREATE INDEX intento_offer_idx
+                ON auto_apply.intento_postulacion (offer_id, created_at DESC);
+
+              CREATE INDEX intento_cuenta_idx
+                ON auto_apply.intento_postulacion (account_site_id, created_at DESC);
+
+              CREATE INDEX intento_status_idx
+                ON auto_apply.intento_postulacion (status);
+
+              CREATE TABLE auto_apply.resultado_postulacion (
+                id             UUID        NOT NULL DEFAULT gen_random_uuid(),
+                attempt_id     BIGINT      NOT NULL,
+                outcome        TEXT        NOT NULL,
+                failure_reason TEXT,
+                outcome_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+                learned_features JSONB,
+                created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+                CONSTRAINT resultado_postulacion_pk PRIMARY KEY (id),
+                CONSTRAINT resultado_outcome_chk CHECK (outcome IN ('won', 'rejected', 'no_response')),
+                CONSTRAINT resultado_fk_intento
+                  FOREIGN KEY (attempt_id)
+                  REFERENCES auto_apply.intento_postulacion (id)
+                  ON DELETE RESTRICT
+                  ON UPDATE CASCADE
+              );
+
+              CREATE UNIQUE INDEX resultado_attempt_idx
+                ON auto_apply.resultado_postulacion (attempt_id);
+
+              CREATE INDEX resultado_outcome_idx
+                ON auto_apply.resultado_postulacion (outcome, outcome_at DESC);
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS auto_apply.resultado_postulacion CASCADE;
+              DROP TABLE IF EXISTS auto_apply.intento_postulacion CASCADE;

@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - preConditions:
+      - onFail: HALT
+      - dbms:
+          type: postgresql
+
+  - changeSet:
+      id: 000-create-schema
+      author: auto-apply-hub
+      changes:
+        - sql:
+            sql: CREATE SCHEMA IF NOT EXISTS auto_apply;
+      rollback:
+        - sql:
+            sql: DROP SCHEMA IF EXISTS auto_apply CASCADE;
+
+  - include:
+      file: changes/001-create-oferta_proyecto.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: changes/002-create-cuenta-reglas.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: changes/003-create-analisis-estrategia.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: changes/004-create-intentos-resultados.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: changes/005-create-perfil_operativo.yaml
+      relativeToChangelogFile: true

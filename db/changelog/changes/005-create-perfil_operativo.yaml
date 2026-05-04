@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-perfil_operativo
+      author: auto-apply-hub
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE auto_apply.perfil_operativo (
+                id              UUID         NOT NULL DEFAULT gen_random_uuid(),
+                profile_name    TEXT         NOT NULL,
+                skill_tag       TEXT         NOT NULL,
+                min_price_floor NUMERIC(12,2) NOT NULL,
+                currency        TEXT         NOT NULL DEFAULT 'USD',
+                risk_threshold  NUMERIC(5,2) NOT NULL DEFAULT 0.30,
+                active          BOOLEAN      NOT NULL DEFAULT true,
+                notes           TEXT,
+                created_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+                updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+                CONSTRAINT perfil_operativo_pk PRIMARY KEY (id),
+                CONSTRAINT perfil_operativo_floor_chk CHECK (min_price_floor >= 0),
+                CONSTRAINT perfil_operativo_risk_chk CHECK (risk_threshold >= 0 AND risk_threshold <= 1)
+              );
+
+              CREATE UNIQUE INDEX perfil_operativo_skill_active_idx
+                ON auto_apply.perfil_operativo (skill_tag)
+                WHERE active = true;
+
+              CREATE INDEX perfil_operativo_active_idx
+                ON auto_apply.perfil_operativo (active);
+
+              -- Seed: tarifas mínimas por tecnología
+              INSERT INTO auto_apply.perfil_operativo
+                (profile_name, skill_tag, min_price_floor, currency, risk_threshold)
+              VALUES
+                ('TypeScript / Node.js', 'typescript',  25.00, 'USD', 0.30),
+                ('TypeScript / Node.js', 'nodejs',      25.00, 'USD', 0.30),
+                ('Python',              'python',       20.00, 'USD', 0.30),
+                ('React / Frontend',    'react',        20.00, 'USD', 0.35),
+                ('PostgreSQL / DB',     'postgresql',   18.00, 'USD', 0.25),
+                ('DevOps / Railway',    'devops',       30.00, 'USD', 0.40),
+                ('Genérico',            'general',      15.00, 'USD', 0.50);
+      rollback:
+        - sql:
+            sql: DROP TABLE IF EXISTS auto_apply.perfil_operativo CASCADE;

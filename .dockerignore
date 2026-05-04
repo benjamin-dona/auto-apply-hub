@@ -1,0 +1,14 @@
+.git
+.github
+.specify
+.vscode
+node_modules
+dist
+build
+coverage
+*.log
+.env
+.env.*
+README.md
+specs
+tests

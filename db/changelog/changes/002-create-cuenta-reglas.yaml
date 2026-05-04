@@ -1,0 +1,78 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-cuenta-reglas
+      author: auto-apply-hub
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE auto_apply.cuenta_sitio (
+                id                    UUID          NOT NULL DEFAULT gen_random_uuid(),
+                site                  TEXT          NOT NULL,
+                account_alias         TEXT          NOT NULL,
+                username_ref          TEXT          NOT NULL,
+                credential_secret_ref TEXT          NOT NULL,
+                status                TEXT          NOT NULL DEFAULT 'active',
+                last_login_at         TIMESTAMPTZ,
+                health_score          NUMERIC(5,2)  NOT NULL DEFAULT 100,
+                created_at            TIMESTAMPTZ   NOT NULL DEFAULT now(),
+                updated_at            TIMESTAMPTZ   NOT NULL DEFAULT now(),
+                CONSTRAINT cuenta_sitio_pk PRIMARY KEY (id),
+                CONSTRAINT cuenta_sitio_status_chk CHECK (status IN ('active', 'suspended', 'cooldown'))
+              );
+
+              CREATE UNIQUE INDEX cuenta_sitio_alias_idx
+                ON auto_apply.cuenta_sitio (site, account_alias);
+
+              CREATE INDEX cuenta_sitio_status_idx
+                ON auto_apply.cuenta_sitio (site, status);
+
+              -- Reglas de postulación por sitio (versionadas)
+              CREATE TABLE auto_apply.regla_sitio (
+                id             UUID        NOT NULL DEFAULT gen_random_uuid(),
+                site           TEXT        NOT NULL,
+                rule_type      TEXT        NOT NULL,
+                version        INT         NOT NULL,
+                definition     JSONB       NOT NULL DEFAULT '{}',
+                active         BOOLEAN     NOT NULL DEFAULT true,
+                effective_from TIMESTAMPTZ NOT NULL DEFAULT now(),
+                effective_to   TIMESTAMPTZ,
+                created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+                CONSTRAINT regla_sitio_pk PRIMARY KEY (id),
+                CONSTRAINT regla_sitio_type_chk CHECK (rule_type IN ('eligibility', 'format', 'timing', 'pricing'))
+              );
+
+              CREATE UNIQUE INDEX regla_sitio_version_idx
+                ON auto_apply.regla_sitio (site, rule_type, version);
+
+              CREATE INDEX regla_sitio_active_idx
+                ON auto_apply.regla_sitio (site, active)
+                WHERE active = true;
+
+              -- Reglas de asignación de cuenta
+              CREATE TABLE auto_apply.regla_asignacion_cuenta (
+                id              UUID        NOT NULL DEFAULT gen_random_uuid(),
+                site            TEXT        NOT NULL,
+                priority        INT         NOT NULL,
+                condition_expr  JSONB       NOT NULL DEFAULT '{}',
+                account_site_id UUID        NOT NULL,
+                active          BOOLEAN     NOT NULL DEFAULT true,
+                created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+                CONSTRAINT regla_asignacion_cuenta_pk PRIMARY KEY (id),
+                CONSTRAINT regla_asignacion_fk_cuenta
+                  FOREIGN KEY (account_site_id)
+                  REFERENCES auto_apply.cuenta_sitio (id)
+                  ON DELETE RESTRICT
+                  ON UPDATE CASCADE
+              );
+
+              CREATE INDEX regla_asignacion_cuenta_priority_idx
+                ON auto_apply.regla_asignacion_cuenta (site, priority);
+
+              CREATE INDEX regla_asignacion_cuenta_account_idx
+                ON auto_apply.regla_asignacion_cuenta (account_site_id);
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS auto_apply.regla_asignacion_cuenta CASCADE;
+              DROP TABLE IF EXISTS auto_apply.regla_sitio CASCADE;
+              DROP TABLE IF EXISTS auto_apply.cuenta_sitio CASCADE;

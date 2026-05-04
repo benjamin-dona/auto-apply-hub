@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-analisis-estrategia
+      author: auto-apply-hub
+      changes:
+        - sql:
+            sql: |
+              CREATE TABLE auto_apply.analisis_oferta (
+                id            UUID        NOT NULL DEFAULT gen_random_uuid(),
+                offer_id      TEXT        NOT NULL,
+                site          TEXT        NOT NULL,
+                score         NUMERIC(5,2) NOT NULL,
+                confidence    NUMERIC(5,2) NOT NULL,
+                reasons       JSONB       NOT NULL DEFAULT '[]',
+                rule_versions JSONB       NOT NULL DEFAULT '{}',
+                analyzed_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+                CONSTRAINT analisis_oferta_pk PRIMARY KEY (id),
+                CONSTRAINT analisis_oferta_fk_offer
+                  FOREIGN KEY (offer_id)
+                  REFERENCES auto_apply.oferta_proyecto (id)
+                  ON DELETE CASCADE
+                  ON UPDATE CASCADE
+              );
+
+              CREATE INDEX analisis_oferta_offer_idx
+                ON auto_apply.analisis_oferta (offer_id, analyzed_at DESC);
+
+              CREATE INDEX analisis_oferta_score_idx
+                ON auto_apply.analisis_oferta (site, score DESC);
+
+              CREATE TABLE auto_apply.estrategia_postulacion (
+                id                   UUID         NOT NULL DEFAULT gen_random_uuid(),
+                offer_id             TEXT         NOT NULL,
+                analysis_id          UUID         NOT NULL,
+                site                 TEXT         NOT NULL,
+                recommended_price    NUMERIC(12,2) NOT NULL,
+                min_price_floor      NUMERIC(12,2) NOT NULL,
+                proposal_template_id TEXT         NOT NULL,
+                suggested_send_at    TIMESTAMPTZ  NOT NULL,
+                rationale            JSONB        NOT NULL DEFAULT '{}',
+                created_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
+                CONSTRAINT estrategia_postulacion_pk PRIMARY KEY (id),
+                CONSTRAINT estrategia_fk_offer
+                  FOREIGN KEY (offer_id)
+                  REFERENCES auto_apply.oferta_proyecto (id)
+                  ON DELETE CASCADE
+                  ON UPDATE CASCADE,
+                CONSTRAINT estrategia_fk_analisis
+                  FOREIGN KEY (analysis_id)
+                  REFERENCES auto_apply.analisis_oferta (id)
+                  ON DELETE RESTRICT
+                  ON UPDATE CASCADE,
+                CONSTRAINT estrategia_price_chk
+                  CHECK (recommended_price >= min_price_floor)
+              );
+
+              CREATE INDEX estrategia_offer_idx
+                ON auto_apply.estrategia_postulacion (offer_id, created_at DESC);
+      rollback:
+        - sql:
+            sql: |
+              DROP TABLE IF EXISTS auto_apply.estrategia_postulacion CASCADE;
+              DROP TABLE IF EXISTS auto_apply.analisis_oferta CASCADE;

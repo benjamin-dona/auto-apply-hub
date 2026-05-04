@@ -1,0 +1,56 @@
+{
+  "name": "auto-apply-hub",
+  "version": "0.1.0",
+  "description": "Sistema automatizado de análisis y postulación multi-sitio para ganar proyectos freelance",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "db": "pnpm run db:migrate",
+    "db:docker:build": "docker build -f docker/liquibase/Dockerfile -t autoapply-liquibase:local .",
+    "db:migrate:docker": "bash scripts/liquibase-docker.sh update",
+    "db:validate:docker": "bash scripts/liquibase-docker.sh validate",
+    "db:rollback:docker": "bash scripts/liquibase-docker.sh rollbackCount 1",
+    "db:migrate": "bash scripts/liquibase-docker.sh update",
+    "db:validate": "bash scripts/liquibase-docker.sh validate",
+    "db:rollback": "sh -c 'bash scripts/liquibase-docker.sh rollbackCount ${ROLL_BACK:-1}'",
+    "db:status": "bash scripts/liquibase-docker.sh status --verbose"
+  },
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "axios": "^1.7.2",
+    "bullmq": "^5.7.0",
+    "fastify": "^4.28.1",
+    "fastify-plugin": "^4.5.1",
+    "node-cron": "^3.0.3",
+    "pg": "^8.12.0",
+    "pino": "^9.2.0",
+    "pino-pretty": "^11.2.1",
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@types/node-cron": "^3.0.11",
+    "@types/pg": "^8.11.6",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/parser": "^7.15.0",
+    "eslint": "^8.57.0",
+    "supertest": "^7.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.3",
+    "vitest": "^1.6.0"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "version": "1",
+  "name": "AutoApply Hub",
+  "uid": "autoapply-hub-collection",
+  "docs": "API collection for AutoApply Hub. Load secrets from .env — never hardcode credentials.",
+  "environments": {
+    "local": {
+      "base_url": "http://localhost:3001",
+      "simulate_mode": true
+    }
+  },
+  "items": [
+    {
+      "name": "Health",
+      "uid": "health-check",
+      "type": "http",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health",
+        "headers": {},
+        "body": null
+      },
+      "docs": "Verify DB connectivity. Returns 200 ok or 503 degraded."
+    },
+    {
+      "name": "Ingest Offers (Workana)",
+      "uid": "offers-ingest",
+      "type": "http",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/offers/ingest",
+        "headers": { "Content-Type": "application/json" },
+        "body": { "site": "workana" }
+      },
+      "docs": "Trigger async ingestion from Workana. Returns 202 Accepted."
+    },
+    {
+      "name": "Analyze Offer",
+      "uid": "offers-analyze",
+      "type": "http",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/offers/:offerId/analyze",
+        "headers": { "Content-Type": "application/json" },
+        "params": { "offerId": "workana:12345" },
+        "body": null
+      },
+      "docs": "Analyze a specific offer by ID. Returns analysis_id and score."
+    },
+    {
+      "name": "Build Strategy",
+      "uid": "applications-strategy",
+      "type": "http",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/applications/strategy",
+        "headers": { "Content-Type": "application/json" },
+        "body": {
+          "offer_id": "workana:12345",
+          "analysis_id": "00000000-0000-0000-0000-000000000001"
+        }
+      },
+      "docs": "Generate a posting strategy for an analyzed offer. Selects account via assignment rules."
+    },
+    {
+      "name": "Submit Application (simulate)",
+      "uid": "applications-submit-simulate",
+      "type": "http",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/applications/submit",
+        "headers": { "Content-Type": "application/json" },
+        "body": {
+          "offer_id": "workana:12345",
+          "strategy_id": "00000000-0000-0000-0000-000000000002",
+          "account_site_id": "00000000-0000-0000-0000-000000000003",
+          "mode": "simulate"
+        }
+      },
+      "docs": "Submit a simulated application. Safe to run — no real submission. DEFAULT_SIMULATE=true blocks real mode."
+    },
+    {
+      "name": "Sync Results",
+      "uid": "results-sync",
+      "type": "http",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/results/sync",
+        "headers": { "Content-Type": "application/json" },
+        "body": {
+          "outcomes": [
+            {
+              "attempt_id": "1",
+              "outcome": "won",
+              "outcome_at": "2026-05-04T10:00:00Z"
+            }
+          ]
+        }
+      },
+      "docs": "Sync application outcomes for learning cycle. Accepts batch of results."
+    }
+  ]
+}
