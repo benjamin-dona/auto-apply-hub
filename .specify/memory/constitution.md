@@ -1,17 +1,20 @@
 <!--
   Sync Impact Report
   ===================
-  Version change: 1.0.0 → 1.1.0
+  Version change: 1.1.0 → 1.2.0
   Modified principles:
     - VII. TypeScript-First: añadido Liquibase como herramienta
       obligatoria de migraciones
   Added sections:
     - Estándares PostgreSQL (nueva sección con mejores prácticas
       de estructura de datos)
+    - Integraciones API y Bruno (nueva sección para estructura
+      de conexión y validación de APIs)
   Removed sections: N/A
   Modified sections:
-    - Flujo de Desarrollo: migraciones ahora requieren Liquibase
-      changelogs en lugar de documentación genérica
+    - VII. TypeScript-First: añadido estándar de colecciones Bruno
+      para integraciones HTTP
+    - Flujo de Desarrollo: integración de validación API con Bruno
   Templates requiring updates:
     - .specify/templates/plan-template.md ✅ compatible
     - .specify/templates/spec-template.md ✅ compatible
@@ -125,6 +128,28 @@ El proyecto DEBE ser containerizado y desplegable en Railway.
   Liquibase (changelogs en formato XML, YAML o SQL).
 - Prohibido aplicar DDL manual en producción; toda alteración
   de esquema DEBE pasar por un changelog versionado.
+- Cuando exista integración HTTP/API, DEBE mantenerse una
+  colección Bruno versionada para documentar requests,
+  autenticación y validaciones operativas.
+
+## Integraciones API y Bruno
+
+Si una funcionalidad requiere conexión a APIs (internas o externas),
+el proyecto DEBE usar Bruno como estándar de estructura operativa
+cuando sea necesario para pruebas y validación manual controlada.
+
+- Las colecciones Bruno DEBEN versionarse en el repositorio bajo
+  `bruno/` por dominio de integración.
+- Cada endpoint crítico DEBE tener request de referencia, variables
+  de entorno y ejemplo de respuesta esperada.
+- Flujos de autenticación (token, cookies de sesión, renovación)
+  DEBEN documentarse en Bruno sin exponer secretos reales.
+- Los secretos usados por Bruno DEBEN provenir de `.env` local o
+  secret manager; nunca valores hardcodeados.
+- Cambios relevantes de contrato API DEBEN reflejarse en Bruno en
+  el mismo PR para evitar deriva entre implementación y operación.
+- Bruno complementa tests automatizados: no reemplaza pruebas de
+  contrato ni pruebas de integración en CI.
 
 ## Estándares PostgreSQL
 
@@ -212,6 +237,8 @@ prácticas oficiales del proyecto PostgreSQL.
   Liquibase con rollback definido e incluirse en el PR.
 - Todo scraper DEBE incluir verificación de `robots.txt`
   y rate limiting.
+- Para integraciones API, el PR DEBE actualizar la colección Bruno
+  correspondiente cuando cambien endpoints, headers o payloads.
 - CI pipeline: lint → build → test → Liquibase validate →
   Docker build → deploy automático en merge a `main`.
 - Commits DEBEN seguir Conventional Commits
@@ -235,4 +262,4 @@ alinearse con los principios aquí definidos.
 - Revisión de cumplimiento: al menos una vez por sprint o
   ciclo de desarrollo.
 
-**Version**: 1.1.0 | **Ratified**: 2026-05-04 | **Last Amended**: 2026-05-04
+**Version**: 1.2.0 | **Ratified**: 2026-05-04 | **Last Amended**: 2026-05-04

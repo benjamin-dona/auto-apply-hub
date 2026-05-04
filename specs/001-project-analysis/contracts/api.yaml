@@ -1,0 +1,132 @@
+openapi: 3.0.3
+info:
+  title: AutoApply Hub Planning Contract
+  version: 0.1.0
+  description: Contractos minimos para ciclo de login, busqueda, analisis, postulacion y resultados.
+servers:
+  - url: https://api.autoapply.local
+paths:
+  /offers/ingest:
+    post:
+      summary: Ejecuta ingesta multi-sitio
+      operationId: ingestOffers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sites, runMode]
+              properties:
+                sites:
+                  type: array
+                  items:
+                    type: string
+                runMode:
+                  type: string
+                  enum: [scheduled, manual]
+      responses:
+        '202':
+          description: Ingesta aceptada
+  /offers/{offerId}/analyze:
+    post:
+      summary: Analiza una oferta bajo reglas del sitio
+      operationId: analyzeOffer
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Analisis calculado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [score, confidence, reasons]
+                properties:
+                  score:
+                    type: number
+                  confidence:
+                    type: number
+                  reasons:
+                    type: array
+                    items:
+                      type: string
+  /applications/strategy:
+    post:
+      summary: Genera estrategia de postulacion
+      operationId: buildApplicationStrategy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [offerId]
+              properties:
+                offerId:
+                  type: string
+      responses:
+        '200':
+          description: Estrategia creada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [strategyId, recommendedPrice, accountSiteId]
+                properties:
+                  strategyId:
+                    type: string
+                  recommendedPrice:
+                    type: number
+                  accountSiteId:
+                    type: string
+  /applications/submit:
+    post:
+      summary: Ejecuta postulacion simulada o real
+      operationId: submitApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [strategyId, mode]
+              properties:
+                strategyId:
+                  type: string
+                mode:
+                  type: string
+                  enum: [simulate, real]
+      responses:
+        '200':
+          description: Postulacion procesada
+        '409':
+          description: Regla del sitio invalida envio
+  /results/sync:
+    post:
+      summary: Sincroniza resultados de postulaciones
+      operationId: syncApplicationResults
+      responses:
+        '202':
+          description: Sincronizacion iniciada
+  /health:
+    get:
+      summary: Healthcheck
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Servicio saludable
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
