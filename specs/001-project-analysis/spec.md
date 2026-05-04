@@ -84,7 +84,7 @@ Como operador, quiero monitorear resultados de postulaciones (ganada, rechazada,
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE tratar paginas/listados de ofertas de proyecto como fuente primaria de datos para el ciclo completo de analisis y postulacion.
+- **FR-001**: El sistema DEBE tratar paginas/listados de ofertas de proyecto como fuente primaria de datos para el ciclo completo de analisis y postulacion; priorizando APIs oficiales cuando existan y aplicando scraping responsable como fallback (ver FR-013).
 - **FR-002**: El sistema DEBE identificar para cada oferta su sitio de origen, estado, fecha de publicacion y atributos clave para toma de decision.
 - **FR-003**: El sistema DEBE deduplicar ofertas repetidas del mismo sitio y consolidar equivalencias entre sitios cuando describan la misma oportunidad.
 - **FR-004**: El sistema DEBE mantener un catalogo versionado de reglas de postulacion por sitio y usarlo en cada evaluacion.

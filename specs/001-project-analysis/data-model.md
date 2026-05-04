@@ -120,7 +120,7 @@
 
 - Purpose: Intento simulado o real de envio.
 - Fields:
-  - id: bigserial, PK
+  - id: bigint GENERATED ALWAYS AS IDENTITY, PK
   - offer_id: text, FK -> oferta_proyecto.id
   - strategy_id: uuid, FK -> estrategia_postulacion.id
   - account_site_id: uuid, FK -> cuenta_sitio.id
@@ -149,6 +149,26 @@
 - Indexes:
   - (attempt_id) unique
   - (outcome, outcome_at desc)
+
+### perfil_operativo
+
+- Purpose: Parametros de costo minimo, capacidades y limites de riesgo usados para tomar decisiones de postulacion.
+- Fields:
+  - id: uuid, PK
+  - profile_name: text, not null
+  - skill_tag: text, not null
+  - min_price_floor: numeric(12,2), not null
+  - currency: text, not null default 'USD'
+  - risk_threshold: numeric(5,2), not null default 0.3
+  - active: boolean, not null default true
+  - notes: text, nullable
+  - created_at: timestamptz, not null
+  - updated_at: timestamptz, not null
+- Indexes:
+  - (skill_tag) unique where active = true
+  - (active)
+- Relationships:
+  - Consultado por estrategia_postulacion para calcular min_price_floor
 
 ## Reglas de validacion
 
